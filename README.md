@@ -40,7 +40,7 @@ CICR_Inventory/
 Since this application is developed as a zero-dependency static page, it is extremely easy to launch without complex package installs:
 
 ### Option A: Direct Launch (Easiest)
-Simply navigate to your repository folder and **double-click** [index.html](file:///c:/Users/HP/CICR_Inventory/CICR_Inventory/index.html) (or right-click and open it with your favorite web browser).
+Simply navigate to your repository folder and **double-click** `index.html` (or right-click and open it with your favorite web browser).
 
 ### Option B: Local Static Server
 To avoid local browser file-scheme restrictions, you can serve the directory using simple server commands in your terminal:
@@ -61,7 +61,7 @@ To avoid local browser file-scheme restrictions, you can serve the directory usi
 
 ## 🎨 Customizing the 3D Engine
 
-You can easily adjust the parameters of the 3D grid and particles in [app.js](file:///c:/Users/HP/CICR_Inventory/CICR_Inventory/app.js):
+You can easily adjust the parameters of the 3D grid and particles in `app.js`:
 
 *   **Adjust Grid Movement Speed**: Modify `this.moveSpeed = 0.05;` inside the `Background3D` constructor.
 *   **Change Grid Colors**: Modify the Hex color values in `createGrid()`:
@@ -72,6 +72,4 @@ You can easily adjust the parameters of the 3D grid and particles in [app.js](fi
 ---
 
 ## 📜 Credits & License
-Created for the **Creative & Innovative Cell in Robotics (CICR)** student chapter. Designed with love to aid builders, hackers, and robotics engineers in maintaining a clean lab workspace.
-
-*Enjoy building!* 🚀🔧
+Created for the **Creative & Innovative Cell in Robotics (CICR)**. 
