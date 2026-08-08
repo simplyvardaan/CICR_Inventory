@@ -139,6 +139,7 @@ class Background3D {
     
     private grid1!: THREE.GridHelper;
     private grid2!: THREE.GridHelper;
+    private wallGrid!: THREE.GridHelper;
     private particles!: THREE.Points;
     
     private mouseX = 0;
@@ -202,6 +203,13 @@ class Background3D {
         const pointLight2 = new THREE.PointLight(0x00f0ff, 1.5, 100);
         pointLight2.position.set(20, 5, 10);
         this.scene.add(pointLight2);
+
+        // Vertical background wall grid for depth
+        const wallColor = new THREE.Color(0x00f0ff);
+        this.wallGrid = new THREE.GridHelper(this.gridSize, this.gridDivisions, wallColor, helperColor);
+        this.wallGrid.rotation.x = Math.PI / 2;
+        this.wallGrid.position.set(0, 35, -60);
+        this.scene.add(this.wallGrid);
     }
 
     private createParticles() {
@@ -346,7 +354,6 @@ class DashboardManager {
     private noResults: HTMLElement;
     private searchInput: HTMLInputElement;
     private clearSearchBtn: HTMLElement;
-    private categoryFilters: HTMLElement;
     private resultsCount: HTMLElement;
 
     private statTotal: HTMLElement;
@@ -356,7 +363,8 @@ class DashboardManager {
 
     private btnAddTrigger: HTMLElement;
     private btnLogs: HTMLElement;
-    private navHome: HTMLElement;
+    private navDashboard: HTMLElement;
+    private navInventory: HTMLElement;
     private navAbout: HTMLElement;
 
     constructor() {
@@ -364,7 +372,6 @@ class DashboardManager {
         this.noResults = document.getElementById('no-results')!;
         this.searchInput = document.getElementById('search-input') as HTMLInputElement;
         this.clearSearchBtn = document.getElementById('clear-search')!;
-        this.categoryFilters = document.getElementById('category-filters')!;
         this.resultsCount = document.getElementById('results-count')!;
 
         this.statTotal = document.getElementById('stat-total')!;
@@ -373,9 +380,12 @@ class DashboardManager {
         this.statCategories = document.getElementById('stat-categories')!;
 
         this.btnAddTrigger = document.getElementById('nav-add-item')!;
-        this.btnLogs = document.getElementById('btn-logs-bell')!;
-        this.navHome = document.getElementById('nav-home')!;
+        this.btnLogs = document.getElementById('nav-logs-bell')!;
+        this.navDashboard = document.getElementById('nav-dashboard')!;
+        this.navInventory = document.getElementById('nav-inventory')!;
         this.navAbout = document.getElementById('nav-about')!;
+
+
 
         this.init();
     }
@@ -401,53 +411,122 @@ class DashboardManager {
             this.searchInput.focus();
         });
 
-        this.categoryFilters.addEventListener('click', (e) => {
-            const btn = (e.target as HTMLElement).closest('.filter-btn') as HTMLElement | null;
-            if (!btn) return;
+        // Sync active category states between sidebar items and tag pills
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const tagPills = document.querySelectorAll('.tag-pill');
 
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        const selectCategory = (category: string) => {
+            this.activeCategory = category;
+            
+            sidebarItems.forEach(item => {
+                const itemCat = (item as HTMLElement).dataset.category || 'all';
+                if (itemCat === category) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
 
-            this.activeCategory = btn.dataset.category || 'all';
+            tagPills.forEach(pill => {
+                const pillCat = (pill as HTMLElement).dataset.category || 'all';
+                if (pillCat === category) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
+                }
+            });
+
             this.renderInventory();
+        };
+
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const cat = (item as HTMLElement).dataset.category || 'all';
+                selectCategory(cat);
+            });
         });
+
+        tagPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                const cat = (pill as HTMLElement).dataset.category || 'all';
+                selectCategory(cat);
+            });
+        });
+
+        const closeWelcomeScreen = () => {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            if (welcomeScreen && welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.transform = 'translateY(-100%)';
+                welcomeScreen.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+                setTimeout(() => {
+                    welcomeScreen.style.display = 'none';
+                }, 800);
+            }
+        };
 
         this.btnAddTrigger.addEventListener('click', (e) => {
             e.preventDefault();
+            closeWelcomeScreen();
             ModalManager.open('add-item-modal');
         });
 
         this.btnLogs.addEventListener('click', () => {
+            closeWelcomeScreen();
             ModalManager.openLogsDrawer();
         });
 
-        this.navHome.addEventListener('click', (e) => {
+        // Dashboard Tab click listener
+        this.navDashboard.addEventListener('click', (e) => {
             e.preventDefault();
+            closeWelcomeScreen();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.navDashboard.classList.add('active');
+            
+            const appContainer = document.getElementById('app-container')!;
+            appContainer.classList.add('view-mode-landing');
+            appContainer.classList.remove('view-mode-vault');
+        });
+
+        // Inventory Tab click listener
+        const showInventoryTab = () => {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.navInventory.classList.add('active');
+            
+            const appContainer = document.getElementById('app-container')!;
+            appContainer.classList.remove('view-mode-landing');
+            appContainer.classList.add('view-mode-vault');
+        };
+
+        this.navInventory.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeWelcomeScreen();
             this.searchInput.value = '';
             this.searchQuery = '';
             this.clearSearchBtn.style.display = 'none';
-            this.activeCategory = 'all';
-            
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.filter-btn[data-category="all"]')!.classList.add('active');
-            
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            this.navHome.classList.add('active');
-            
-            this.renderInventory();
-            document.querySelector('.control-panel')!.scrollIntoView({ behavior: 'smooth' });
+            selectCategory('all');
+            showInventoryTab();
         });
+
+        // "GET STARTED WITH VAULT" button click listener
+        const startBtn = document.getElementById('hero-btn-start');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                showInventoryTab();
+            });
+        }
 
         this.navAbout.addEventListener('click', (e) => {
             e.preventDefault();
+            closeWelcomeScreen();
             ModalManager.openAboutModal();
         });
 
         const heroExplore = document.getElementById('hero-btn-explore');
         const heroAbout = document.getElementById('hero-btn-about');
+        
         if (heroExplore) {
             heroExplore.addEventListener('click', () => {
-                document.querySelector('.control-panel')!.scrollIntoView({ behavior: 'smooth' });
+                showInventoryTab();
             });
         }
         if (heroAbout) {
@@ -502,9 +581,17 @@ class DashboardManager {
         this.noResults.style.display = 'none';
         this.resultsCount.innerText = `Showing ${filtered.length} component${filtered.length > 1 ? 's' : ''}`;
 
-        filtered.forEach(item => {
+        filtered.forEach((item, index) => {
             const card = this.createCardElement(item);
+            card.style.transitionDelay = `${(index % 4) * 0.08}s`;
             this.inventoryGrid.appendChild(card);
+            
+            // Stagger addition of active class so transition plays
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    card.classList.add('active');
+                }, 50);
+            });
         });
 
         lucide.createIcons();
@@ -512,7 +599,7 @@ class DashboardManager {
 
     private createCardElement(item: InventoryItem): HTMLElement {
         const card = document.createElement('div');
-        card.className = 'inventory-card glass';
+        card.className = 'inventory-card glass reveal';
         
         const borrowedSum = item.borrowedBy.reduce((sum, rec) => sum + rec.qty, 0);
         const available = item.quantity - borrowedSum;
@@ -566,6 +653,8 @@ class DashboardManager {
         return card;
     }
 }
+
+
 
 // ==========================================
 // 5. Modal & Form Controller Manager
@@ -849,6 +938,7 @@ class AuthManager {
     private static signupForm: HTMLFormElement;
     private static authOverlay: HTMLElement;
     private static appContainer: HTMLElement;
+    private static globalNavbar: HTMLElement;
 
     private static loginUserInp: HTMLInputElement;
     private static loginPassInp: HTMLInputElement;
@@ -872,6 +962,7 @@ class AuthManager {
         this.signupForm = document.getElementById('signup-form') as HTMLFormElement;
         this.authOverlay = document.getElementById('auth-overlay')!;
         this.appContainer = document.getElementById('app-container')!;
+        this.globalNavbar = document.getElementById('global-navbar')!;
 
         this.loginUserInp = document.getElementById('login-username') as HTMLInputElement;
         this.loginPassInp = document.getElementById('login-password') as HTMLInputElement;
@@ -922,13 +1013,72 @@ class AuthManager {
             e.preventDefault();
             this.handleLogout();
         });
+
+        // Password visibility toggles
+        const loginToggle = document.getElementById('login-password-toggle')!;
+        const loginPass = document.getElementById('login-password') as HTMLInputElement;
+        loginToggle.addEventListener('click', () => {
+            const currentType = loginPass.getAttribute('type');
+            const newType = currentType === 'password' ? 'text' : 'password';
+            loginPass.setAttribute('type', newType);
+            
+            const icon = loginToggle.querySelector('i')!;
+            icon.setAttribute('data-lucide', newType === 'password' ? 'eye' : 'eye-off');
+            lucide.createIcons();
+        });
+
+        const signupToggle = document.getElementById('signup-password-toggle')!;
+        const signupPass = document.getElementById('signup-password') as HTMLInputElement;
+        signupToggle.addEventListener('click', () => {
+            const currentType = signupPass.getAttribute('type');
+            const newType = currentType === 'password' ? 'text' : 'password';
+            signupPass.setAttribute('type', newType);
+            
+            const icon = signupToggle.querySelector('i')!;
+            icon.setAttribute('data-lucide', newType === 'password' ? 'eye' : 'eye-off');
+            lucide.createIcons();
+        });
     }
 
     private static checkAuth() {
         const currentUser = localStorage.getItem('cicr_auth');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        
         if (currentUser) {
-            this.loginSuccess(currentUser);
+            // Logged in: show welcome screen first on top of dashboard
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'flex';
+                welcomeScreen.style.transform = 'translateY(0)';
+                
+                const enterBtn = document.getElementById('welcome-btn-enter');
+                if (enterBtn) {
+                    enterBtn.onclick = () => {
+                        welcomeScreen.style.transform = 'translateY(-100%)';
+                        welcomeScreen.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+                        setTimeout(() => {
+                            welcomeScreen.style.display = 'none';
+                            // Immediately switch to Inventory view mode
+                            this.appContainer.classList.remove('view-mode-landing');
+                            this.appContainer.classList.add('view-mode-vault');
+                            
+                            const dashboardLink = document.getElementById('nav-dashboard');
+                            const inventoryLink = document.getElementById('nav-inventory');
+                            if (dashboardLink && inventoryLink) {
+                                dashboardLink.classList.remove('active');
+                                inventoryLink.classList.add('active');
+                            }
+                        }, 800);
+                    };
+                }
+            }
+            this.appContainer.classList.add('view-mode-landing');
+            this.appContainer.classList.remove('view-mode-vault');
+            this.globalNavbar.style.display = 'flex';
+            this.loginSuccess(currentUser, true); // Pass a flag to indicate we bypassed the login form transition
         } else {
+            // Not logged in: show login screen immediately, hide welcome screen
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            this.globalNavbar.style.display = 'none';
             this.authOverlay.classList.remove('hidden');
             this.authOverlay.style.display = 'flex';
             this.appContainer.style.display = 'none';
@@ -959,12 +1109,27 @@ class AuthManager {
         this.loginErr.style.animation = 'shake-error 0.4s ease';
     }
 
-    private static loginSuccess(username: string) {
+    private static loginSuccess(username: string, bypassWelcome: boolean = false) {
         localStorage.setItem('cicr_auth', username);
         this.navUsername.innerText = username;
+        this.globalNavbar.style.display = 'flex';
 
-        this.authOverlay.classList.add('hidden');
-        setTimeout(() => {
+        const welcomeScreen = document.getElementById('welcome-screen')!;
+
+        // Reset active view styles
+        this.appContainer.classList.add('view-mode-landing');
+        this.appContainer.classList.remove('view-mode-vault');
+        
+        // Reset active link state in global navbar
+        const dashboardLink = document.getElementById('nav-dashboard');
+        const inventoryLink = document.getElementById('nav-inventory');
+        if (dashboardLink && inventoryLink) {
+            dashboardLink.classList.add('active');
+            inventoryLink.classList.remove('active');
+        }
+
+        if (bypassWelcome) {
+            // Already logged in on load: show appContainer in background
             this.authOverlay.style.display = 'none';
             this.appContainer.style.display = 'flex';
             
@@ -975,7 +1140,49 @@ class AuthManager {
             }
             lucide.createIcons();
             TerminalSimulator.start();
-        }, 400);
+        } else {
+            // Fresh login: fade out auth form, show welcome screen, prepare appContainer
+            this.authOverlay.classList.add('hidden');
+            setTimeout(() => {
+                this.authOverlay.style.display = 'none';
+                
+                // Show welcome screen with entrance animations
+                welcomeScreen.style.display = 'flex';
+                welcomeScreen.style.transform = 'translateY(0)';
+                
+                // Setup enter vault trigger to slide welcome screen away
+                const enterBtn = document.getElementById('welcome-btn-enter');
+                if (enterBtn) {
+                    enterBtn.onclick = () => {
+                        welcomeScreen.style.transform = 'translateY(-100%)';
+                        welcomeScreen.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+                        setTimeout(() => {
+                            welcomeScreen.style.display = 'none';
+                            // Immediately switch to Inventory view mode
+                            this.appContainer.classList.remove('view-mode-landing');
+                            this.appContainer.classList.add('view-mode-vault');
+                            
+                            const dashboardLink = document.getElementById('nav-dashboard');
+                            const inventoryLink = document.getElementById('nav-inventory');
+                            if (dashboardLink && inventoryLink) {
+                                dashboardLink.classList.remove('active');
+                                inventoryLink.classList.add('active');
+                            }
+                        }, 800);
+                    };
+                }
+
+                // Render dashboard behind the scenes
+                this.appContainer.style.display = 'flex';
+                if (!window.dashboard) {
+                    window.dashboard = new DashboardManager();
+                } else {
+                    window.dashboard.init();
+                }
+                lucide.createIcons();
+                TerminalSimulator.start();
+            }, 400);
+        }
     }
 
     private static handleSignup() {
@@ -1027,6 +1234,14 @@ class AuthManager {
         localStorage.removeItem('cicr_auth');
         
         this.appContainer.style.display = 'none';
+        this.globalNavbar.style.display = 'none';
+        
+        const welcomeScreen = document.getElementById('welcome-screen');
+        if (welcomeScreen) {
+            welcomeScreen.style.display = 'none';
+            welcomeScreen.style.transform = 'translateY(0)';
+        }
+
         this.authOverlay.style.display = 'flex';
         setTimeout(() => {
             this.authOverlay.classList.remove('hidden');
@@ -1047,11 +1262,15 @@ class TerminalSimulator {
         body.innerHTML = '';
 
         const lines = [
-            "Initializing CICR Core database v3.5...",
-            "Connecting telemetry link to JIIT-128 robotics vault...",
-            "Loading inventory catalog directory... [SUCCESS]",
-            "Status: System online. Access level: OPERATOR.",
-            "Database streams active. Ready for query."
+            { text: "Initializing CICR Core OS v3.5...", color: "#f3f4f6" },
+            { text: "Establishing telemetry link to local JIIT-128 robotics vault...", color: "#f3f4f6" },
+            { text: "Robotics telemetry buffers initialized successfully [OK]", color: "#39ff14" },
+            { text: "Connecting to Qdrant vector database: Index hardware_kb loaded", color: "#00f0ff" },
+            { text: "Seeding RAG knowledge base (STM32 manuals + pinouts)...", color: "#f3f4f6" },
+            { text: "LangGraph workflow network compiled: 8 agent nodes ready", color: "#f3f4f6" },
+            { text: "Vision Node: YOLOv11 component classification weights checked", color: "#ff007a" },
+            { text: "Vision Node: SAM2 segmented coordinate maps ready", color: "#bd00ff" },
+            { text: "MCP Server: Exposing tools: checkout_item, query_stock", color: "#ffd700" }
         ];
 
         let lineIdx = 0;
@@ -1059,13 +1278,14 @@ class TerminalSimulator {
         function appendNextLine() {
             if (lineIdx >= lines.length) return;
 
-            const text = lines[lineIdx];
+            const line = lines[lineIdx];
             const lineEl = document.createElement('div');
             lineEl.className = 'terminal-line';
             body!.appendChild(lineEl);
+            body!.scrollTop = body!.scrollHeight;
 
             let charIdx = 0;
-            lineEl.innerHTML = `<span>&rarr;&nbsp;</span><span class="txt-content"></span>`;
+            lineEl.innerHTML = `<span style="color: ${line.color}">&rarr;&nbsp;&rarr;&nbsp;</span><span class="txt-content" style="color: ${line.color}"></span>`;
             const txtSpan = lineEl.querySelector('.txt-content') as HTMLElement;
             
             lineEl.classList.add('visible');
@@ -1075,8 +1295,8 @@ class TerminalSimulator {
             lineEl.appendChild(cursorSpan);
 
             function typeChar() {
-                if (charIdx < text.length) {
-                    txtSpan.textContent += text[charIdx];
+                if (charIdx < line.text.length) {
+                    txtSpan.textContent += line.text[charIdx];
                     charIdx++;
                     setTimeout(typeChar, 25);
                 } else {
@@ -1086,10 +1306,17 @@ class TerminalSimulator {
                         const finalCursor = document.createElement('span');
                         finalCursor.className = 'cursor';
                         lineEl.appendChild(finalCursor);
+                        
+                        // Always keep typing: clear terminal logs and restart after 4 seconds!
+                        setTimeout(() => {
+                            body!.innerHTML = '';
+                            lineIdx = 0;
+                            appendNextLine();
+                        }, 4000);
+                    } else {
+                        lineIdx++;
+                        setTimeout(appendNextLine, 350);
                     }
-                    
-                    lineIdx++;
-                    setTimeout(appendNextLine, 350);
                 }
             }
             typeChar();
@@ -1098,6 +1325,8 @@ class TerminalSimulator {
         appendNextLine();
     }
 }
+
+
 
 // Extend global window interface for development debugging
 declare global {
@@ -1112,8 +1341,72 @@ declare global {
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     DatabaseManager.init();
-    window.bg3D = new Background3D();
+    // Disabled 3D canvas background to support static high-fidelity green gridlines
+    // window.bg3D = new Background3D();
     ModalManager.init();
     AuthManager.init();
     lucide.createIcons();
+
+    // Global mouse-coordinate spotlight tracker for interactive cyber gridlines
+    document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        document.documentElement.style.setProperty('--mouse-x', `${x}%`);
+        document.documentElement.style.setProperty('--mouse-y', `${y}%`);
+    });
+
+    // Custom 3D tilt interaction logic matching Pinterest OVI interface
+    const apply3DTilt = (el: HTMLElement, maxRotation: number = 10) => {
+        el.addEventListener('mousemove', (e) => {
+            const rect = el.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -maxRotation;
+            const rotateY = ((x - centerX) / centerX) * maxRotation;
+            
+            el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            el.style.transition = 'none';
+        });
+        
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
+            el.style.transition = 'transform 0.5s ease';
+        });
+    };
+
+    const welcomeTextContainer = document.querySelector('.welcome-huge-text') as HTMLElement;
+    if (welcomeTextContainer) apply3DTilt(welcomeTextContainer, 15);
+
+    // Setup navbar logo click event to slide the welcome screen down
+    const navLogo = document.getElementById('nav-brand-logo');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (navLogo && welcomeScreen) {
+        navLogo.addEventListener('click', () => {
+            welcomeScreen.style.display = 'flex';
+            // Force reflow/redraw
+            welcomeScreen.offsetHeight;
+            welcomeScreen.style.transform = 'translateY(0)';
+            welcomeScreen.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+        });
+    }
+
+
+
+    // IntersectionObserver scroll reveal triggers matching Pinterest visual transition
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, {
+        threshold: 0.08,
+        rootMargin: '0px 0px -60px 0px'
+    });
+    revealElements.forEach(el => observer.observe(el));
+
+
 });
