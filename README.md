@@ -1,75 +1,140 @@
-# CICR | Robotics Inventory Hub 🤖✨
+<div align="center">
 
-Welcome to the official **Creative & Innovative Cell in Robotics (CICR)** Student Club Inventory Hub! This web application is a premium, high-fidelity single-page web app built with a futuristic cyberpunk neon aesthetic, featuring an **interactive 3D wireframe grid background**.
+<img src="./logo.png" width="90" alt="CICR Logo" />
 
-It is designed to manage laboratory components, tools, microcontrollers, and actuators while offering student members a seamless borrowing and return workflow.
+### Creative & Innovative Cell in Robotics — Inventory System
+
+**Where creative hardware meets autonomous coordination.**
+Track, reserve, and deploy microcontrollers, sensors, and actuators from JIIT's robotics vault to your development bench.
+
+[![Live Demo](https://img.shields.io/badge/LIVE-cicrinventory.vercel.app-00f0ff?style=for-the-badge&logo=vercel&logoColor=white)](https://cicrinventory.vercel.app/)
+[![Repo](https://img.shields.io/badge/GITHUB-CICR__Inventory-bd00ff?style=for-the-badge&logo=github&logoColor=white)](https://github.com/simplyvardaan/CICR_Inventory)
+[![License](https://img.shields.io/badge/LICENSE-MIT-1e2327?style=for-the-badge)](#license)
+
+</div>
+
+<br>
+
+<div align="center">
+<img src="https://img.shields.io/badge/STATUS-ACTIVE-00f0ff?style=flat-square" />
+<img src="https://img.shields.io/badge/BUILD-Vite%20%2B%20TypeScript-bd00ff?style=flat-square" />
+<img src="https://img.shields.io/badge/DEPLOY-Vercel-black?style=flat-square" />
+</div>
+
+<br>
 
 ---
 
-## 🌟 Key Features
+## 📡 System Overview
 
-*   **Interactive 3D Background Engine**: Leverages **Three.js** to render an infinite scrolling neon floor grid and a starry particle field drifting into the horizon. Features subtle mouse-parallax camera rotations.
-*   **Aesthetic Glassmorphism UI**: Uses modern CSS variables, backdrop-filter blurs, neon-styled box-shadows, and elegant glowing animations to overlay a clean, intuitive inventory dashboard.
-*   **Search & Filtering System**: Real-time typing index searching across component names, tags, and locations. Tab filters classify items by category (Controllers, Sensors, Actuators, Power, Tools).
-*   **Interactive Inventory Actions**:
-    *   **Detailed View**: Click any card to inspect parts, storage positions, available stock, specific parameters, and live borrowing queues.
-    *   **Add Components**: Add new stock items with custom parameters that are automatically categorized.
-    *   **Borrowing Flow**: Log when members borrow items by requesting name, roll number, quantity, and purpose, which limits checkout bounds.
-    *   **Inline Returns**: Return items directly from the detailed borrower logs to replenish active stock levels.
-*   **Live Transaction Auditing**: Displays a detailed transaction panel to audit logs for checking out, returning, and registration histories.
-*   **Persistent Storage**: Saves the entire dataset state locally within the user's browser `localStorage`, ensuring data persists between session refreshes.
+**CICR VAULT** is the official inventory management platform for the **Creative & Innovative Cell in Robotics (CICR)** at **Jaypee Institute of Information Technology (JIIT), Sector-128, Noida**.
 
----
+No more group-chat scavenger hunts for a missing Arduino or a lost servo. CICR VAULT gives every club member a single, live registry of the cell's hardware — what exists, where it's stored, who has it, and when it's coming back.
 
-## 📂 Project Structure
-
-The project consists of three core front-end files created directly in the workspace repository:
-
-```text
-CICR_Inventory/
-├── index.html   # Main application structure, modals, drawers, and CDNs
-├── style.css    # Neon-dark design token layout rules, variables, and responsive breakpoints
-├── app.js       # Three.js 3D renderer and core JavaScript database actions
-└── README.md    # Project documentation and quick-start guide (this file)
+```
+> INIT CICR_VAULT...
+> LOADING COMPONENT DATABASE...
+> SIGNAL STABLE // NODES ACTIVE
+> READY FOR DEPLOYMENT.
 ```
 
 ---
 
-## 🚀 How to Run Locally
+## ⚙️ Core Features
 
-Since this application is developed as a zero-dependency static page, it is extremely easy to launch without complex package installs:
-
-### Option A: Direct Launch (Easiest)
-Simply navigate to your repository folder and **double-click** `index.html` (or right-click and open it with your favorite web browser).
-
-### Option B: Local Static Server
-To avoid local browser file-scheme restrictions, you can serve the directory using simple server commands in your terminal:
-
-*   **Python**:
-    ```bash
-    python -m http.server 8000
-    ```
-    Then visit `http://localhost:8000` in your browser.
-
-*   **NodeJS (npm)**:
-    ```bash
-    npx serve
-    ```
-    Then visit the printed port (usually `http://localhost:3000` or `5000`).
+| Module | What it does |
+|---|---|
+| 🔐 **Auth** | Username/password login + sign-up, so every checkout is tied to a real member |
+| 📊 **Dashboard** | Live counters — total vaulted stock, active loans, low reserves, active project groups |
+| 🗂️ **Vault Registry** | Searchable, filterable catalog across Microcontrollers, Sensors, Actuators, Power, and Tools |
+| ➕ **Add Component** | Register new hardware with category, quantity, storage location, and full specs |
+| 🔄 **Borrow / Return** | Checkout flow that logs borrower name, roll number, quantity, and purpose — with live stock limits |
+| 🕓 **History** | Full transaction log of every checkout, return, and inventory update, for accountability |
+| ℹ️ **About** | Info on the CICR cell, specializations, and lab facility |
 
 ---
 
-## 🎨 Customizing the 3D Engine
+## 🛠️ Tech Stack
 
-You can easily adjust the parameters of the 3D grid and particles in `app.js`:
+<div align="center">
 
-*   **Adjust Grid Movement Speed**: Modify `this.moveSpeed = 0.05;` inside the `Background3D` constructor.
-*   **Change Grid Colors**: Modify the Hex color values in `createGrid()`:
-    *   `new THREE.Color(0x00f0ff)` (Neon Cyan)
-    *   `new THREE.Color(0xbd00ff)` (Neon Purple)
-*   **Particle Count**: Change `const particleCount = 250;` inside `createParticles()` to increase or decrease star density.
+| Frontend | Tooling | Deployment |
+|:---:|:---:|:---:|
+| TypeScript | Vite | Vercel |
+| HTML5 / CSS3 | npm | GitHub |
+
+</div>
+
+> Styled with a dark, neon cyberpunk aesthetic — glassmorphism panels, cyan/purple glow accents, and a HUD-style status bar (`SIGNAL STABLE // LATENCY 14MS // NODES ACTIVE`) baked right into the UI.
 
 ---
 
-## 📜 Credits & License
-Created for the **Creative & Innovative Cell in Robotics (CICR)**. 
+## 🚀 Getting Started
+
+```bash
+# Clone the vault
+git clone https://github.com/simplyvardaan/CICR_Inventory.git
+cd CICR_Inventory
+
+# Install dependencies
+npm install
+
+# Run the dev server
+npm run dev
+```
+
+Then open the printed local URL (usually `http://localhost:5173`) in your browser.
+
+**Build for production:**
+
+```bash
+npm run build
+```
+
+---
+
+## 📁 Project Structure
+
+```
+CICR_Inventory/
+├── public/          # Static assets
+├── src/             # Application source
+├── index.html       # Entry point
+├── logo.png         # CICR logo
+├── package.json     # Dependencies & scripts
+├── tsconfig.json     # TypeScript config
+└── README.md         # You are here
+```
+
+---
+
+## 🧭 Roadmap
+
+- [ ] Role-based access (admin vs. member)
+- [ ] QR-code component tagging for instant lookup
+- [ ] Overdue-loan notifications
+- [ ] Export vault data (CSV / PDF reports)
+
+---
+
+## 🤝 Contributing
+
+Built by and for CICR members — contributions, bug reports, and feature ideas are welcome.
+
+1. Fork the repo
+2. Create a branch (`git checkout -b feature/your-idea`)
+3. Commit your changes
+4. Open a pull request
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. Built with 🧠 + 🔧 by the Creative & Innovative Cell in Robotics, JIIT-128.
+
+<div align="center">
+
+**© 2026 CICR VAULT — Creative & Innovative Cell in Robotics**
+*Instant component access. Robotics vault system.*
+
+</div>
